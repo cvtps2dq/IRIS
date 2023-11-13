@@ -67,8 +67,34 @@ namespace IRIS.DataFlow.Connection
             }
         }
 
-        
+        public void Strobe(DataFlowRGB color, int delay)
+        {
+            while (true)
+            {
+                Port.Write(color.ToString());
+                Thread.Sleep(delay);
+                Port.Write("0 0 0 ");
+                Thread.Sleep(delay);
+            }
+        }
+        public void Pulse(DataFlowRGB color, int delay, double acc, int interval)
+        {
+            while (true) 
+            {
+                Transition(color, new DataFlowRGB(0, 0, 0), delay, acc);
+                Thread.Sleep(interval);
+                Transition(new DataFlowRGB(0, 0, 0), color, delay, acc);
+                Thread.Sleep(interval);
+            }
+        }
+        public void ColorWheel(int delay, double acc)
+        {
+            Transition(new DataFlowRGB(255, 0, 0), new DataFlowRGB(0, 255, 0), delay, acc);
+            Transition(new DataFlowRGB(0, 255, 0), new DataFlowRGB(0, 0, 255), delay, acc);
+            Transition(new DataFlowRGB(0, 0, 255), new DataFlowRGB(255, 0, 0), delay, acc);
+            Thread.Sleep(delay);
+        }
     }
-
+        
 
 }
