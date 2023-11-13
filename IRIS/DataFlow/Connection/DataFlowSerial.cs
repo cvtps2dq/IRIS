@@ -11,7 +11,7 @@ namespace IRIS.DataFlow.Connection
 {
     public class DataFlowSerial
     {
-        const int GLOBAL_WAIT_TIME = 64;
+        const int GLOBAL_WAIT_TIME = 512;
         private SerialPort Port { get; set; }
 
         public DataFlowSerial(SerialPort port)
@@ -33,23 +33,8 @@ namespace IRIS.DataFlow.Connection
         public void Connect()
         {
             Port.Open();
-            Console.WriteLine("Connected to: " + Port.PortName + ".");
-            Console.WriteLine("IRIS RGB Initializing...");
-
-            // send color and wait for response
-            Port.Write("0 0 0 ");
-
-            while (true)
-            {
-                Port.Write("0 0 0 ");
-                Thread.Sleep(GLOBAL_WAIT_TIME);
-                if(Port.ReadLine() == "Color has been set."){
-                    Console.WriteLine("IRIS Initialized.");
-                    break;
-                }
-                
-            }
-
+            System.Diagnostics.Debug.WriteLine("Connected to: " + Port.PortName + ".");
+            System.Diagnostics.Debug.WriteLine("IRIS RGB Initializing...");
         }
 
         public void SetColor(DataFlowRGB color)
@@ -59,10 +44,37 @@ namespace IRIS.DataFlow.Connection
 
         public void Transition(DataFlowRGB startColor, DataFlowRGB endColor, int delay, double acc)
         {
-            for(double i = 0; i < 1; i+= acc)
+            
+            for (double i = 0; i <= 1; i+= acc)
             {
                 DataFlowRGB color = startColor.Interpolate(endColor, i);
                 Port.Write(color.ToString());
+                Thread.Sleep(delay);
+            }
+            
+        }
+
+        public void SmoothRandom(int delay, double acc)
+        {
+            Random rand = new();
+            DataFlowRGB start = new(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255));
+            while (true)
+            {
+                DataFlowRGB end = new(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255));
+                Transition(start, end, delay, acc);
+                Thread.Sleep(delay);
+                start = end;
+            }
+        }
+
+        public void HarshRandom(int delay, double acc)
+        {
+            Random rand = new();
+            while (true)
+            {
+                DataFlowRGB start = new(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255));
+                DataFlowRGB end = new(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255));
+                Transition(start, end, delay, acc);
                 Thread.Sleep(delay);
             }
         }
@@ -89,10 +101,15 @@ namespace IRIS.DataFlow.Connection
         }
         public void ColorWheel(int delay, double acc)
         {
+            while (true) 
+            { 
             Transition(new DataFlowRGB(255, 0, 0), new DataFlowRGB(0, 255, 0), delay, acc);
+            Thread.Sleep(delay);
             Transition(new DataFlowRGB(0, 255, 0), new DataFlowRGB(0, 0, 255), delay, acc);
+            Thread.Sleep(delay);
             Transition(new DataFlowRGB(0, 0, 255), new DataFlowRGB(255, 0, 0), delay, acc);
             Thread.Sleep(delay);
+            }
         }
     }
         

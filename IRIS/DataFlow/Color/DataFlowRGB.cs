@@ -65,9 +65,9 @@
             else
             {
                 return new DataFlowRGB(
-                    curColor[0] + (input[0] - curColor[0] * ratio),
-                    curColor[1] + (input[1] - curColor[1] * ratio),
-                    curColor[2] + (input[2] - curColor[2] * ratio)
+                    curColor[0] + (input[0] - curColor[0]) * ratio,
+                    curColor[1] + (input[1] - curColor[1]) * ratio,
+                    curColor[2] + (input[2] - curColor[2]) * ratio
                     );
             }
         }
